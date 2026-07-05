@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#002F6C">
+  <title>TERRY KUANG Xiangqi · 象棋</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <!-- a11y live region -->
+  <div id="ariaLive" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ============ Topbar (Sticky, TERRY KUANG Blue) ============ -->
+  <header class="topbar" role="banner">
+    <div class="topbar-inner">
+      <a class="logo" href="#" aria-label="TERRY KUANG Home">
+        <span class="logo-mark">TERRY KUANG</span>
+        <span class="logo-payoff">XIANGQI MASTER</span>
+      </a>
+      <div class="game-title" aria-label="Xiangqi">象棋 · XIANGQI</div>
+      <div class="turn-pill" id="turnPill" aria-live="polite">
+        <span class="turn-dot" id="turnDot"></span>
+        <span class="turn-text" id="turnText">RED TO MOVE</span>
+      </div>
+      <div class="btn-group" role="toolbar" aria-label="Game controls">
+        <button class="btn primary" id="modePVP" aria-pressed="true">PVP</button>
+        <button class="btn" id="modePVE" aria-pressed="false">PVE</button>
+        <div class="difficulty-group" id="difficultyGroup" hidden>
+          <button class="btn difficulty-btn" id="diffBeginner" aria-pressed="false">初学</button>
+          <button class="btn difficulty-btn" id="diffAdvanced" aria-pressed="true">进阶</button>
+          <button class="btn difficulty-btn" id="diffProfessional" aria-pressed="false">专业</button>
+          <button class="btn difficulty-btn" id="diffExpert" aria-pressed="false">专家</button>
+        </div>
+        <button class="btn" id="undoBtn" aria-label="Undo last move">↶ UNDO</button>
+        <button class="btn" id="newBtn" aria-label="Start new game">↻ NEW</button>
+        <div class="user-chip" id="userChip" hidden>
+          <span class="user-name" id="userEmail"></span>
+          <button type="button" class="btn btn-signout" id="userSignout" aria-label="Sign out" title="退出登录 · SIGN OUT">⎋ SIGN OUT</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ Status strip ============ -->
+  <div class="status-strip" id="statusStrip" role="status" aria-live="polite">
+    <span class="status-text" id="statusText">棋局開始 · 紅方先走</span>
+  </div>
+
+  <!-- AI thinking banner (hidden by default) -->
+  <div class="ai-banner" id="aiBanner" role="status" aria-live="polite" hidden>
+    <span class="spinner" aria-hidden="true"></span>
+    <span>AI 思考中 · AI THINKING</span>
+  </div>
+
+  <!-- ============ Main 12-col grid ============ -->
+  <main class="main">
+    <!-- Left: Board (8 cols) -->
+    <section class="board-area" aria-label="Game board">
+      <div class="board-header">
+        <span>BLACK VIEW · 黑方視角</span>
+        <span id="moveCounter">MOVE 0 · ROUND 0</span>
+      </div>
+      <div class="coord-row coord-arabic" aria-hidden="true">
+        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+      </div>
+      <div class="board-svg-wrap">
+        <svg class="board-svg" id="boardSvg"
+             viewBox="0 0 540 600"
+             role="application"
+             aria-label="Xiangqi board, 32 pieces in starting position"
+             tabindex="0">
+          <!-- populated by board.js -->
+        </svg>
+      </div>
+      <div class="board-footer">
+        <div class="coord-cjk" aria-hidden="true">紅方視角</div>
+        <div class="coord-row coord-cjk" aria-hidden="true">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span>
+        </div>
+        <div class="coord-spacer"></div>
+      </div>
+      <div class="legal-legend" aria-hidden="true">
+        <span><span class="legend-dot"></span>可走</span>
+        <span><span class="legend-ring"></span>可吃</span>
+        <span><span class="legend-last"></span>上一步</span>
+        <span class="legend-keys">鍵盤 · 方向鍵 移動 · ENTER 選子 · U 悔棋 · ESC 取消</span>
+      </div>
+    </section>
+
+    <!-- Right: Sidebar (4 cols) -->
+    <aside class="sidebar" aria-label="Game info">
+      <div class="panel">
+        <h2 class="panel-title">走子歷史 <span class="badge" id="historyBadge">0 STEPS</span></h2>
+        <div class="history-list" id="historyList" role="log" aria-live="polite">
+          <div class="history-empty">尚未走子</div>
+        </div>
+      </div>
+      <div class="panel panel-captures">
+        <h2 class="panel-title">吃子 <span class="badge">CAPTURED</span></h2>
+        <div class="capture-row">
+          <div class="capture-side">
+            <span class="capture-label">紅方吃</span>
+            <div class="capture-pieces" id="redCaptures"></div>
+          </div>
+          <div class="capture-side">
+            <span class="capture-label">黑方吃</span>
+            <div class="capture-pieces" id="blackCaptures"></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-controls">
+        <h2 class="panel-title">控制 <span class="badge">CONTROLS</span></h2>
+        <div class="controls">
+          <button class="ctrl-btn" id="ctrlUndo">↶ 悔棋 UNDO</button>
+          <button class="ctrl-btn" id="ctrlSwap">⇄ 重新開始</button>
+          <button class="ctrl-btn danger" id="ctrlResign">⊘ 認輸 RESIGN</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ============ Victory / Game Over Modal ============ -->
+  <div class="modal-overlay" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-banner">
+        <div class="trophy" aria-hidden="true">♛</div>
+        <h1 id="modalTitle">紅方勝</h1>
+        <div class="subtitle" id="modalSubtitle">RED WINS · CHECKMATE</div>
+      </div>
+      <div class="modal-body">
+        <div class="result-stats">
+          <div class="result-stat">
+            <div class="label">回合</div>
+            <div class="value" id="statRounds">0</div>
+          </div>
+          <div class="result-stat">
+            <div class="label">總步數</div>
+            <div class="value" id="statSteps">0</div>
+          </div>
+          <div class="result-stat">
+            <div class="label">吃子</div>
+            <div class="value" id="statCaptures">0</div>
+          </div>
+        </div>
+        <div class="final-move" id="finalMove"></div>
+        <div class="modal-actions">
+          <button class="btn primary" id="modalNew">↻ 新對局 NEW GAME</button>
+          <button class="btn secondary" id="modalClose">關閉 CLOSE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Login Overlay ============ -->
+  <div class="auth-overlay" id="authOverlay" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <span class="auth-mark">TERRY KUANG</span>
+        <span class="auth-payoff">XIANGQI MASTER</span>
+        <h1 id="authTitle">象棋 · XIANGQI</h1>
+        <p class="auth-tagline" id="authTagline">歡迎回來 · Welcome back to your game</p>
+      </div>
+
+      <form class="auth-form" id="authForm" autocomplete="on" novalidate>
+        <label class="auth-field">
+          <span id="authUserLabel">用户名 · USERNAME</span>
+          <input type="text" id="authUsername" name="username" required
+                 autocomplete="username" minlength="3" maxlength="20"
+                 pattern="[A-Za-z0-9_]+"
+                 placeholder="3-20 letters, numbers or underscore"
+                 spellcheck="false" />
+        </label>
+        <label class="auth-field">
+          <span>密码 · PASSWORD</span>
+          <input type="password" id="authPassword" name="password" required
+                 minlength="6" autocomplete="current-password"
+                 placeholder="at least 6 characters" />
+        </label>
+        <label class="auth-field auth-field-confirm" id="authConfirmField">
+          <span>确认密码 · CONFIRM PASSWORD</span>
+          <input type="password" id="authPasswordConfirm" name="password_confirm"
+                 minlength="6" autocomplete="new-password"
+                 placeholder="re-enter your password" />
+        </label>
+
+        <div class="auth-error" id="authError" role="alert" hidden></div>
+        <div class="auth-ok" id="authOk" role="status" hidden></div>
+
+        <button type="submit" class="auth-submit" id="authSubmit">登 錄 · SIGN IN</button>
+        <button type="button" class="auth-toggle" id="authToggle">
+          还没有账号? <strong>注册 · SIGN UP</strong>
+        </button>
+      </form>
+
+      <div class="auth-foot">
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer" role="contentinfo">
+    © 2026 TERRY KUANG · XIANGQI MASTER · v1.0
+  </footer>
+
+  <script src="scripts/board.js" defer></script>
+  <script src="scripts/rules.js" defer></script>
+  <script src="scripts/game.js" defer></script>
+  <script src="scripts/ai.js" defer></script>
+  <script src="scripts/auth.js" defer></script>
+  <script src="scripts/storage.js" defer></script>
+  <script src="scripts/ui.js" defer></script>
+  <script src="scripts/main.js" defer></script>
+</body>
+</html>

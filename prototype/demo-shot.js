@@ -1,0 +1,99 @@
+// Drive a real game sequence then screenshot
+const { execSync, spawn } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const URL  = `file:///${path.join('D:\\AI WORKSPACE\\XiangQi', 'index.html').replace(/\\/g, '/')}`;
+const OUTD = 'D:\\AI WORKSPACE\\XiangQi\\prototype\\screenshots';
+
+// Make a "demo" HTML that auto-runs 4 moves then screenshots
+const demoHtml = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>demo</title>
+<link rel="stylesheet" href="../styles/main.css"></head>
+<body>
+<header class="topbar" role="banner"><div class="topbar-inner">
+  <a class="logo" href="#"><span class="logo-mark">DSV</span><span class="logo-payoff">GLOBAL TRANSPORT AND LOGISTICS</span></a>
+  <div class="game-title">象棋 · XIANGQI</div>
+  <div class="turn-pill" id="turnPill" aria-live="polite"><span class="turn-dot" id="turnDot"></span><span class="turn-text" id="turnText"></span></div>
+  <div class="btn-group" role="toolbar"><button class="btn primary" id="modePVP">PVP</button><button class="btn" id="modePVE">PVE</button><button class="btn" id="undoBtn">↶ UNDO</button><button class="btn" id="newBtn">↻ NEW</button></div>
+</div></header>
+<div class="status-strip" id="statusStrip"><span class="status-text" id="statusText">棋局開始 · 紅方先走</span></div>
+<div class="ai-banner" id="aiBanner" hidden><span class="spinner"></span><span>AI 思考中</span></div>
+<main class="main">
+  <section class="board-area">
+    <div class="board-header"><span>BLACK VIEW · 黑方視角</span><span id="moveCounter">MOVE 0 · ROUND 0</span></div>
+    <div class="coord-row coord-arabic"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+    <div class="board-svg-wrap"><svg class="board-svg" id="boardSvg" viewBox="0 0 540 600" tabindex="0"></svg></div>
+    <div class="board-footer"><div class="coord-cjk">紅方視角</div><div class="coord-row coord-cjk"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span></div><div class="coord-spacer"></div></div>
+    <div class="legal-legend"><span><span class="legend-dot"></span>可走</span><span><span class="legend-ring"></span>可吃</span><span><span class="legend-last"></span>上一步</span><span class="legend-keys">鍵盤 · 方向鍵 移動 · ENTER 選子 · U 悔棋</span></div>
+  </section>
+  <aside class="sidebar">
+    <div class="panel"><h2 class="panel-title">走子歷史 <span class="badge" id="historyBadge">0 STEPS</span></h2><div class="history-list" id="historyList"></div></div>
+    <div class="panel"><h2 class="panel-title">吃子 <span class="badge">CAPTURED</span></h2><div class="capture-row"><div class="capture-side"><span class="capture-label">紅方吃</span><div class="capture-pieces" id="redCaptures"></div></div><div class="capture-side"><span class="capture-label">黑方吃</span><div class="capture-pieces" id="blackCaptures"></div></div></div></div>
+    <div class="panel"><h2 class="panel-title">控制 <span class="badge">CONTROLS</span></h2><div class="controls"><button class="ctrl-btn" id="ctrlUndo">↶ 悔棋</button><button class="ctrl-btn" id="ctrlSwap">⇄ 重新開始</button><button class="ctrl-btn danger" id="ctrlResign">⊘ 認輸</button></div></div>
+  </aside>
+</main>
+<div class="modal-overlay" id="modal" hidden><div class="modal" role="dialog" aria-modal="true"><div class="modal-banner"><div class="trophy">♛</div><h1 id="modalTitle">紅方勝</h1><div class="subtitle" id="modalSubtitle">RED WINS</div></div><div class="modal-body"><div class="result-stats"><div class="result-stat"><div class="label">回合</div><div class="value" id="statRounds">0</div></div><div class="result-stat"><div class="label">總步數</div><div class="value" id="statSteps">0</div></div><div class="result-stat"><div class="label">吃子</div><div class="value" id="statCaptures">0</div></div></div><div class="final-move" id="finalMove"></div><div class="modal-actions"><button class="btn primary" id="modalNew">新對局</button><button class="btn secondary" id="modalClose">關閉</button></div></div></div></div>
+<footer class="footer">© 2026 DSV · GLOBAL TRANSPORT AND LOGISTICS · XIANGQI BRAND EDITION</footer>
+<div id="ariaLive" class="sr-only" aria-live="polite"></div>
+<script src="../scripts/board.js"></script><script src="../scripts/rules.js"></script><script src="../scripts/game.js"></script><script src="../scripts/ai.js"></script><script src="../scripts/ui.js"></script>
+<script>
+// Wait a tick, then run a series of moves
+window.addEventListener('load', () => {
+  XQGame.newGame('pvp');
+  XQUI.attach();
+  // Real xiangqi opening sequence
+  XQGame.makeMove([7,1],[7,4]); // 炮二平五
+  XQGame.makeMove([0,7],[2,6]); // 馬 8 進 7
+  XQGame.makeMove([9,1],[7,2]); // 傌二進三
+  XQGame.makeMove([0,0],[2,0]); // 車 9 進 2 (actually let's do 卒)
+  XQGame.makeMove([6,4],[5,4]); // 兵五進一
+  XQGame.makeMove([3,4],[4,4]); // 卒 5 進 1
+  XQGame.makeMove([7,7],[7,4]); // 炮八平五
+  XQGame.makeMove([2,1],[2,4]); // 砲 2 平 5
+  XQUI.syncAll();
+  // Select red 兵 at (5,4) to show legal moves highlight
+  XQGame.select(5, 4);
+  XQUI.syncAll();
+});
+</script>
+</body></html>`;
+
+const demoPath = path.join('D:\\AI WORKSPACE\\XiangQi\\prototype', 'demo-game.html');
+fs.writeFileSync(demoPath, demoHtml, 'utf-8');
+console.log('Demo page written:', demoPath);
+
+// Screenshot the demo with mid-game state
+const demoUrl = `file:///${demoPath.replace(/\\/g, '/')}`;
+const cases = [
+  { url: demoUrl,   out: 'demo-midgame.png',      vp: '1440x900' },
+  { url: URL,       out: 'final-desktop-v2.png',  vp: '1440x900' },
+  { url: URL,       out: 'final-mobile-v2.png',   vp: '414x896', mobile: true },
+];
+
+for (const c of cases) {
+  const out = path.join(OUTD, c.out);
+  const flags = [
+    `"${CHROME}"`,
+    '--headless',
+    '--disable-gpu',
+    '--no-sandbox',
+    '--hide-scrollbars',
+    `--window-size=${c.vp}`,
+    `--force-device-scale-factor=1`,
+    c.mobile ? '--user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1"' : '',
+    `--screenshot="${out}"`,
+    `--virtual-time-budget=8000`,
+    `"${c.url}"`,
+  ].filter(Boolean).join(' ');
+  console.log(`[shot] ${c.vp}${c.mobile?' (mobile UA)':''} -> ${c.out}`);
+  try {
+    execSync(flags, { stdio: 'pipe', timeout: 30000 });
+    const sz = fs.statSync(out).size;
+    console.log(`  ${(sz/1024).toFixed(1)} KB`);
+  } catch (e) {
+    console.error(`[FAIL] ${e.message}`);
+  }
+}
+console.log('DONE');

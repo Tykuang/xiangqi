@@ -1,0 +1,14 @@
+127.0.0.1 - - [27/Jun/2026 21:50:52] "GET /scripts/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:52] "GET /scripts/storage.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:56] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /styles/main.css HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /scripts/board.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /scripts/rules.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /scripts/game.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /scripts/ai.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /scripts/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /scripts/storage.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /scripts/ui.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /scripts/main.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jun/2026 21:50:57] code 404, message File not found
+127.0.0.1 - - [27/Jun/2026 21:50:57] "GET /@vite/client HTTP/1.1" 404 -

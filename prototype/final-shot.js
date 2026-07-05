@@ -1,0 +1,120 @@
+// Final E2E: runs the game and screenshots key states
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const DIR = 'D:\\AI WORKSPACE\\XiangQi';
+const OUTD = path.join(DIR, 'prototype', 'screenshots');
+
+// Test scenarios
+const tests = [
+  { name: '01-initial-desktop', url: `file:///${path.join(DIR, 'index.html').replace(/\\/g, '/')}`, vp: '1440x900', virtual: 5000 },
+  { name: '02-initial-mobile',  url: `file:///${path.join(DIR, 'index.html').replace(/\\/g, '/')}`, vp: '414x896', mobile: true, virtual: 5000 },
+  { name: '03-initial-tablet',  url: `file:///${path.join(DIR, 'index.html').replace(/\\/g, '/')}`, vp: '800x1100', virtual: 5000 },
+  { name: '04-midgame-desktop', url: `file:///${path.join(DIR, 'prototype', 'demo-game.html').replace(/\\/g, '/')}`, vp: '1440x900', virtual: 8000 },
+  { name: '05-checkmate',       url: `file:///${path.join(DIR, 'prototype', 'checkmate.html').replace(/\\/g, '/')}`, vp: '1440x900', virtual: 5000 },
+  { name: '06-rule-tests',      url: `file:///${path.join(DIR, 'tests.html').replace(/\\/g, '/')}`, vp: '900x1400', virtual: 5000 },
+];
+
+// Make checkmate demo
+const checkmateHtml = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>checkmate</title>
+<link rel="stylesheet" href="../styles/main.css"></head>
+<body>
+<header class="topbar" role="banner"><div class="topbar-inner">
+  <a class="logo" href="#"><span class="logo-mark">DSV</span><span class="logo-payoff">GLOBAL TRANSPORT AND LOGISTICS</span></a>
+  <div class="game-title">象棋 · XIANGQI</div>
+  <div class="turn-pill" id="turnPill" aria-live="polite"><span class="turn-dot" id="turnDot"></span><span class="turn-text" id="turnText"></span></div>
+  <div class="btn-group"><button class="btn primary" id="modePVP">PVP</button><button class="btn" id="modePVE">PVE</button><button class="btn" id="undoBtn">↶ UNDO</button><button class="btn" id="newBtn">↻ NEW</button></div>
+</div></header>
+<div class="status-strip" id="statusStrip"><span class="status-text" id="statusText">棋局開始</span></div>
+<div class="ai-banner" id="aiBanner" hidden></div>
+<main class="main">
+  <section class="board-area">
+    <div class="board-header"><span>BLACK VIEW · 黑方視角</span><span id="moveCounter">MOVE 0</span></div>
+    <div class="coord-row coord-arabic"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+    <div class="board-svg-wrap"><svg class="board-svg" id="boardSvg" viewBox="0 0 540 600" tabindex="0"></svg></div>
+    <div class="board-footer"><div class="coord-cjk">紅方視角</div><div class="coord-row coord-cjk"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span></div><div class="coord-spacer"></div></div>
+    <div class="legal-legend"><span><span class="legend-dot"></span>可走</span><span><span class="legend-ring"></span>可吃</span><span><span class="legend-last"></span>上一步</span><span class="legend-keys">鍵盤提示</span></div>
+  </section>
+  <aside class="sidebar">
+    <div class="panel"><h2 class="panel-title">走子歷史 <span class="badge" id="historyBadge">0</span></h2><div class="history-list" id="historyList"></div></div>
+    <div class="panel"><h2 class="panel-title">吃子 <span class="badge">CAPTURED</span></h2><div class="capture-row"><div class="capture-side"><span class="capture-label">紅方吃</span><div class="capture-pieces" id="redCaptures"></div></div><div class="capture-side"><span class="capture-label">黑方吃</span><div class="capture-pieces" id="blackCaptures"></div></div></div></div>
+    <div class="panel"><h2 class="panel-title">控制 <span class="badge">CONTROLS</span></h2><div class="controls"><button class="ctrl-btn" id="ctrlUndo">↶ 悔棋</button><button class="ctrl-btn" id="ctrlSwap">⇄ 重新開始</button><button class="ctrl-btn danger" id="ctrlResign">⊘ 認輸</button></div></div>
+  </aside>
+</main>
+<div class="modal-overlay" id="modal"><div class="modal"><div class="modal-banner"><div class="trophy">♛</div><h1 id="modalTitle">紅方勝</h1><div class="subtitle" id="modalSubtitle">RED WINS</div></div><div class="modal-body"><div class="result-stats"><div class="result-stat"><div class="label">回合</div><div class="value" id="statRounds">12</div></div><div class="result-stat"><div class="label">總步數</div><div class="value" id="statSteps">24</div></div><div class="result-stat"><div class="label">吃子</div><div class="value" id="statCaptures">8</div></div></div><div class="final-move" id="finalMove"><strong>絕殺 · </strong>車五進一 將軍,黑將無可移動,紅方 <strong>獲勝</strong></div><div class="modal-actions"><button class="btn primary" id="modalNew">新對局</button><button class="btn secondary" id="modalClose">關閉</button></div></div></div></div>
+<footer class="footer">© 2026 DSV</footer>
+<div id="ariaLive" class="sr-only" aria-live="polite"></div>
+<script src="../scripts/board.js"></script><script src="../scripts/rules.js"></script><script src="../scripts/game.js"></script><script src="../scripts/ai.js"></script><script src="../scripts/ui.js"></script>
+<script>
+window.addEventListener('load', () => {
+  XQGame.newGame('pvp');
+  XQUI.attach();
+  // Setup a near-checkmate position
+  const b = XQBoard.getBoard();
+  // Clear most of board
+  for (let r = 0; r < 10; r++) for (let c = 0; c < 9; c++) b[r][c] = 0;
+  // Black 將@(0,4), 士@(1,3) 士@(1,5)
+  b[0][4] = -1; b[1][3] = -2; b[1][5] = -2;
+  // Red: 帥@(9,4), 俥@(0,4) (already there replacing king?? no)
+  // 仕@(8,3)(8,5) 相@(7,2)(7,6)
+  b[9][4] = 1; b[8][3] = 2; b[8][5] = 2; b[7][2] = 3; b[7][6] = 3;
+  // Red 炮@(2,3) 炮@(2,5) - double cannon checkmate
+  b[2][3] = 6; b[2][5] = 6;
+  // Red 車@(0,0)
+  b[0][0] = 4;
+  // One black piece: 卒
+  b[6][0] = -7;
+  XQBoard.setBoard(b);
+  XQGame.State.board = b;
+  XQGame.State.turn = 'red';
+  // Build fake history
+  XQGame.State.history = [
+    {n:1, red:'炮二平五', black:'馬8進7'},
+    {n:2, red:'傌二進三', black:'車9平8'},
+    {n:3, red:'車一平二', black:'卒7進1'},
+    {n:4, red:'兵七進一', black:'炮8平9'},
+    {n:5, red:'馬八進七', black:'車8進6'},
+    {n:6, red:'車九進一', black:'炮2平5'},
+    {n:7, red:'車九平四', black:'馬2進3'},
+    {n:8, red:'車四進三', black:'士4進5'},
+    {n:9, red:'炮八進四', black:'象3進5'},
+    {n:10, red:'炮八平五', black:'士5退4'},
+    {n:11, red:'車四平六', black:'士6進5'},
+    {n:12, red:'車六進一', black:'將5平4'}
+  ];
+  XQGame.State.moveCount = 24;
+  XQGame.State.winner = 'red';
+  XQBoard.renderBoard();
+  XQUI.syncAll();
+});
+</script>
+</body></html>`;
+fs.writeFileSync(path.join(DIR, 'prototype', 'checkmate.html'), checkmateHtml, 'utf-8');
+
+for (const t of tests) {
+  const out = path.join(OUTD, `${t.name}.png`);
+  const flags = [
+    `"${CHROME}"`,
+    '--headless',
+    '--disable-gpu',
+    '--no-sandbox',
+    '--hide-scrollbars',
+    `--window-size=${t.vp}`,
+    `--force-device-scale-factor=1`,
+    t.mobile ? '--user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15"' : '',
+    `--screenshot="${out}"`,
+    `--virtual-time-budget=${t.virtual}`,
+    `"${t.url}"`,
+  ].filter(Boolean).join(' ');
+  try {
+    execSync(flags, { stdio: 'pipe', timeout: 30000 });
+    const sz = fs.statSync(out).size;
+    console.log(`✓ ${t.name.padEnd(25)} ${t.vp.padEnd(10)} ${(sz/1024).toFixed(1)} KB`);
+  } catch (e) {
+    console.error(`✗ ${t.name}: ${e.message.slice(0, 100)}`);
+  }
+}
+console.log('DONE');

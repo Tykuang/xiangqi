@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Screen 06 — About Page</title>
+<style>
+:root{--dsv-blue:#002F6C;--dsv-blue-tint20:#004484;--dsv-white:#FFFFFF;--dsv-black:#000000;--dsv-red:#DA291C;--dsv-yellow:#FFCD00;--dsv-green:#00B050;--dsv-grey-90:#1A1A1A;--dsv-grey-50:#808080;--dsv-grey-10:#E5E5E5;--dsv-grey-5:#F2F2F2;--font:'Arial','Helvetica Neue',sans-serif;--cjk:'PingFang SC','Microsoft YaHei',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--dsv-white);color:var(--dsv-grey-90);min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:64px;background:var(--dsv-blue);color:var(--dsv-white);display:flex;align-items:center;padding:0 32px;gap:24px}
+.logo{display:flex;flex-direction:column;line-height:1}
+.logo-mark{font-size:22px;font-weight:900;letter-spacing:-1px}
+.logo-payoff{font-size:7px;letter-spacing:0.5px;margin-top:2px;opacity:0.85}
+.nav{display:flex;gap:24px;margin-left:auto;font-size:12px;letter-spacing:1px}
+.nav a{color:var(--dsv-white);text-decoration:none;opacity:0.7;cursor:pointer}
+.nav a.active{opacity:1;font-weight:600;border-bottom:2px solid var(--dsv-white);padding-bottom:4px}
+.nav a:hover{opacity:1}
+.hero{background:linear-gradient(135deg,var(--dsv-blue) 0%,var(--dsv-blue-tint20) 100%);color:var(--dsv-white);padding:80px 32px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,205,0,0.1) 0%,transparent 50%),radial-gradient(circle at 20% 80%,rgba(218,41,28,0.08) 0%,transparent 50%)}
+.hero-content{position:relative;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.hero h1{font-family:var(--cjk);font-size:56px;font-weight:700;letter-spacing:-1px;line-height:1.1;margin-bottom:16px}
+.hero .sub-en{font-size:14px;letter-spacing:3px;opacity:0.7;margin-bottom:24px}
+.hero p{font-family:var(--cjk);font-size:16px;line-height:1.7;opacity:0.85;margin-bottom:32px;max-width:480px}
+.hero-cta{display:flex;gap:12px}
+.btn{padding:14px 28px;font-size:14px;font-family:var(--cjk);font-weight:600;letter-spacing:1px;cursor:pointer;border-radius:2px;border:1px solid var(--dsv-white);transition:all 200ms}
+.btn.primary{background:var(--dsv-white);color:var(--dsv-blue)}
+.btn.primary:hover{background:var(--dsv-grey-5)}
+.btn.secondary{background:transparent;color:var(--dsv-white)}
+.btn.secondary:hover{background:rgba(255,255,255,0.1)}
+.hero-visual{display:flex;justify-content:center;align-items:center;position:relative}
+.hero-board{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);padding:24px;border-radius:4px;backdrop-filter:blur(8px)}
+.hero-board svg{border-radius:4px}
+.meta-strip{background:var(--dsv-grey-5);padding:24px 32px;border-bottom:1px solid var(--dsv-grey-10)}
+.meta-strip-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.meta-item{display:flex;align-items:center;gap:12px}
+.meta-num{font-family:var(--cjk);font-size:32px;font-weight:700;color:var(--dsv-blue);line-height:1}
+.meta-label{font-size:10px;letter-spacing:1.5px;color:var(--dsv-grey-50);line-height:1.4}
+.section{max-width:1200px;margin:0 auto;padding:80px 32px}
+.section-title{font-family:var(--cjk);font-size:32px;font-weight:600;color:var(--dsv-blue);margin-bottom:8px;letter-spacing:1px}
+.section-sub{font-size:11px;letter-spacing:2.5px;color:var(--dsv-grey-50);margin-bottom:48px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.feature{background:var(--dsv-white);border:1px solid var(--dsv-grey-10);padding:32px;border-top:3px solid var(--dsv-blue);transition:all 200ms}
+.feature:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,47,108,0.08)}
+.feature.red{border-top-color:var(--dsv-red)}
+.feature.yellow{border-top-color:var(--dsv-yellow)}
+.feature-num{font-size:11px;letter-spacing:2px;color:var(--dsv-grey-50);margin-bottom:16px}
+.feature h3{font-family:var(--cjk);font-size:20px;font-weight:600;color:var(--dsv-blue);margin-bottom:12px}
+.feature p{font-family:var(--cjk);font-size:13px;line-height:1.7;color:var(--dsv-grey-90);opacity:0.8}
+.movement{padding:80px 32px;background:var(--dsv-blue);color:var(--dsv-white)}
+.movement-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.movement h2{font-family:var(--cjk);font-size:40px;font-weight:700;line-height:1.2;margin-bottom:16px}
+.movement p{font-family:var(--cjk);font-size:15px;line-height:1.8;opacity:0.85;margin-bottom:16px}
+.movement-visual{aspect-ratio:1;background:linear-gradient(135deg,var(--dsv-blue-tint20) 0%,var(--dsv-blue) 100%);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.movement-visual::after{content:"GLOBAL · CHESS · LOGISTICS";position:absolute;font-size:18px;letter-spacing:6px;font-weight:700;opacity:0.15}
+.footer{background:var(--dsv-blue);color:var(--dsv-white);padding:32px;font-size:11px;letter-spacing:1.5px;opacity:0.7;text-align:center;border-top:1px solid rgba(255,255,255,0.1)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-mark">DSV</span>
+    <span class="logo-payoff">GLOBAL TRANSPORT AND LOGISTICS</span>
+  </div>
+  <div class="nav">
+    <a>棋盤 BOARD</a>
+    <a>歷史 HISTORY</a>
+    <a>規則 RULES</a>
+    <a class="active">關於 ABOUT</a>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-content">
+    <div>
+      <div class="sub-en">DSV BRAND EDITION · v1.0 · 2026</div>
+      <h1>象棋<br>XIANGQI</h1>
+      <p>千年楚河漢界,百年物流初心。DSV 將全球運輸的策略思維,凝練為一方棋盤的 32 枚棋子 — 走好每一步,送達每一次。</p>
+      <div class="hero-cta">
+        <button class="btn primary">▶ 開始對局 PLAY</button>
+        <button class="btn secondary">📖 規則說明 RULES</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-board">
+        <svg width="360" height="400" viewBox="0 0 540 600">
+          <g stroke="#B3B3B3" stroke-width="1" fill="none">
+            <line x1="30" y1="30" x2="510" y2="30"/><line x1="30" y1="90" x2="510" y2="90"/>
+            <line x1="30" y1="150" x2="510" y2="150"/><line x1="30" y1="210" x2="510" y2="210"/>
+            <line x1="30" y1="270" x2="510" y2="270"/><line x1="30" y1="330" x2="510" y2="330"/>
+            <line x1="30" y1="390" x2="510" y2="390"/><line x1="30" y1="450" x2="510" y2="450"/>
+            <line x1="30" y1="510" x2="510" y2="510"/><line x1="30" y1="570" x2="510" y2="570"/>
+            <line x1="30" y1="30" x2="30" y2="570"/><line x1="90" y1="30" x2="90" y2="570"/>
+            <line x1="150" y1="30" x2="150" y2="570"/><line x1="210" y1="30" x2="210" y2="570"/>
+            <line x1="270" y1="30" x2="270" y2="570"/><line x1="330" y1="30" x2="330" y2="570"/>
+            <line x1="390" y1="30" x2="390" y2="570"/><line x1="450" y1="30" x2="450" y2="570"/>
+            <line x1="510" y1="30" x2="510" y2="570"/>
+            <line x1="210" y1="30" x2="330" y2="150"/><line x1="330" y1="30" x2="210" y2="150"/>
+            <line x1="210" y1="450" x2="330" y2="570"/><line x1="330" y1="450" x2="210" y2="570"/>
+          </g>
+          <rect x="30" y="270" width="480" height="60" fill="white" opacity="0.95"/>
+          <text x="180" y="305" font-family="'PingFang SC',serif" font-size="22" fill="#002F6C" font-weight="600" letter-spacing="20">楚 河</text>
+          <text x="360" y="305" font-family="'PingFang SC',serif" font-size="22" fill="#002F6C" font-weight="600" letter-spacing="20">漢 界</text>
+          <g font-family="'PingFang SC',serif" font-size="20" font-weight="700" text-anchor="middle" dominant-baseline="central">
+            <circle cx="30" cy="30" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="30" y="30" fill="#1A1A1A">車</text>
+            <circle cx="90" cy="30" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="90" y="30" fill="#1A1A1A">馬</text>
+            <circle cx="270" cy="30" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="270" y="30" fill="#1A1A1A">將</text>
+            <circle cx="450" cy="30" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="450" y="30" fill="#1A1A1A">馬</text>
+            <circle cx="510" cy="30" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="510" y="30" fill="#1A1A1A">車</text>
+            <circle cx="90" cy="210" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="90" y="210" fill="#1A1A1A">砲</text>
+            <circle cx="450" cy="210" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="450" y="210" fill="#1A1A1A">砲</text>
+            <circle cx="30" cy="270" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="30" y="270" fill="#1A1A1A">卒</text>
+            <circle cx="150" cy="270" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="150" y="270" fill="#1A1A1A">卒</text>
+            <circle cx="510" cy="270" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="510" y="270" fill="#1A1A1A">卒</text>
+            <circle cx="30" cy="390" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="30" y="390" fill="#DA291C">兵</text>
+            <circle cx="270" cy="390" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="270" y="390" fill="#DA291C">兵</text>
+            <circle cx="510" cy="390" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="510" y="390" fill="#DA291C">兵</text>
+            <circle cx="90" cy="450" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="90" y="450" fill="#DA291C">炮</text>
+            <circle cx="450" cy="450" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="450" y="450" fill="#DA291C">炮</text>
+            <circle cx="30" cy="570" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="30" y="570" fill="#DA291C">俥</text>
+            <circle cx="90" cy="570" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="90" y="570" fill="#DA291C">傌</text>
+            <circle cx="150" cy="570" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="150" y="570" fill="#DA291C">相</text>
+            <circle cx="210" cy="570" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="210" y="570" fill="#DA291C">仕</text>
+            <circle cx="270" cy="570" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="270" y="570" fill="#DA291C">帥</text>
+            <circle cx="330" cy="570" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="330" y="570" fill="#DA291C">仕</text>
+            <circle cx="390" cy="570" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="390" y="570" fill="#DA291C">相</text>
+            <circle cx="450" cy="570" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="450" y="570" fill="#DA291C">傌</text>
+            <circle cx="510" cy="570" r="22" fill="white" stroke="#DA291C" stroke-width="2"/><text x="510" y="570" fill="#DA291C">俥</text>
+            <circle cx="210" cy="90" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="210" y="90" fill="#1A1A1A">士</text>
+            <circle cx="330" cy="90" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="330" y="90" fill="#1A1A1A">士</text>
+            <circle cx="150" cy="30" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="150" y="30" fill="#1A1A1A">象</text>
+            <circle cx="390" cy="30" r="22" fill="white" stroke="#1A1A1A" stroke-width="2"/><text x="390" y="30" fill="#1A1A1A">象</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="meta-strip">
+  <div class="meta-strip-inner">
+    <div class="meta-item">
+      <div class="meta-num">32</div>
+      <div class="meta-label">PIECES<br>棋子</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-num">90</div>
+      <div class="meta-label">CROSSINGS<br>交叉點</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-num">7</div>
+      <div class="meta-label">PIECE TYPES<br>兵種</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-num">0</div>
+      <div class="meta-label">NETWORK<br>離線可玩</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">核心特性</div>
+  <div class="section-sub">CORE FEATURES · DSV BRAND COMPLIANT</div>
+  <div class="features">
+    <div class="feature">
+      <div class="feature-num">01</div>
+      <h3>完整規則</h3>
+      <p>車馬炮士象兵將,7 兵種、32 枚棋子,含蹩馬腿、塞象眼、炮翻山、對將、困斃、絕殺等全部正規賽規則。</p>
+    </div>
+    <div class="feature red">
+      <div class="feature-num">02</div>
+      <h3>DSV 視覺</h3>
+      <p>嚴格遵循 DSV 品牌視覺規範,DSV Blue #002F6C 主調,紅黃綠三色精準搭配,12 列網格、8px 基準間距。</p>
+    </div>
+    <div class="feature yellow">
+      <div class="feature-num">03</div>
+      <h3>零網路依賴</h3>
+      <p>單頁 HTML + CSS + 原生 JS,無任何框架、無外部 CDN、雙擊 index.html 即可開局,完全離線可玩。</p>
+    </div>
+  </div>
+</div>
+
+<div class="movement">
+  <div class="movement-inner">
+    <div>
+      <h2>走好每一步<br>送達每一次</h2>
+      <p>DSV 每天在全球六大洲的 80+ 國家完成數千次運輸。每一次準時送達,都像棋盤上的精妙一步 — 規劃路線、避開障礙、把握時機。</p>
+      <p>這款象棋,獻給所有相信「策略改變結果」的物流人。</p>
+    </div>
+    <div class="movement-visual"></div>
+  </div>
+</div>
+
+<div class="footer">
+  © 2026 DSV · GLOBAL TRANSPORT AND LOGISTICS · XIANGQI BRAND EDITION
+</div>
+</body>
+</html>
